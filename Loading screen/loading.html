@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Loading Screen</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #111;
+    }
+
+    /* ========== LOADING WRAPPER ========== */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+    }
+
+    /* ========== TIRAI KIRI & KANAN ========== */
+    .curtain {
+      position: absolute;
+      top: 0;
+      width: 50%;
+      height: 100%;
+      background-color: #99582a;
+      z-index: 2;
+      transition: transform 1.2s cubic-bezier(0.76, 0, 0.24, 1);
+    }
+
+    .curtain-left {
+      left: 0;
+      transform: translateX(0%);
+    }
+
+    .curtain-right {
+      right: 0;
+      transform: translateX(0%);
+    }
+
+    /* Tirai kebuka */
+    #loading-screen.open .curtain-left {
+      transform: translateX(-100%);
+    }
+
+    #loading-screen.open .curtain-right {
+      transform: translateX(100%);
+    }
+
+    /* ========== LOGO ========== */
+    #logo-wrapper {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      transition: transform 1.2s cubic-bezier(0.76, 0, 0.24, 1),
+                  opacity 0.4s ease 1.0s;
+    }
+
+    /* Logo ikut ke kiri saat tirai kebuka */
+    #loading-screen.open #logo-wrapper {
+      transform: translate(calc(-50% - 50vw), -50%);
+      opacity: 0;
+    }
+
+    #logo-wrapper img {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      animation: spinLogo 1.2s linear infinite;
+      filter: drop-shadow(0 0 18px rgba(255,255,255,0.4));
+    }
+
+    /* Stop spin saat tirai mulai kebuka */
+    #loading-screen.open #logo-wrapper img {
+      animation: none;
+    }
+
+    /* Loading dots */
+    .dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: white;
+      animation: bounce 0.8s ease-in-out infinite;
+    }
+
+    .dots span:nth-child(2) { animation-delay: 0.15s; }
+    .dots span:nth-child(3) { animation-delay: 0.3s; }
+
+    /* ========== ANIMASI ========== */
+    @keyframes spinLogo {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); opacity: 1; }
+      50%       { transform: translateY(-8px); opacity: 0.5; }
+    }
+
+    /* ========== KONTEN UTAMA (di belakang tirai) ========== */
+    #main-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Konten utama yang muncul setelah tirai kebuka -->
+  <div id="main-content">
+    🎉 Selamat datang!
+  </div>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="curtain curtain-left"></div>
+    <div class="curtain curtain-right"></div>
+
+    <div id="logo-wrapper">
+      <img src="logoload.png" alt="Logo" />
+      <div class="dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('load', () => {
+      // Simulasi loading selesai setelah 2.5 detik
+      setTimeout(() => {
+        const screen = document.getElementById('loading-screen');
+        screen.classList.add('open');
+
+        // Hapus loading screen setelah animasi selesai
+        setTimeout(() => {
+          screen.remove();
+        }, 1600);
+      }, 2500);
+    });
+  </script>
+
+</body>
+</html>

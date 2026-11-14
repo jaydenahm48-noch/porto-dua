@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NochyOS Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0f1a;
+      color: #e0e0f0;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    .layout { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 220px;
+      background: #1a1a2e;
+      border-right: 1px solid #2a2a4a;
+      padding: 24px 0;
+      flex-shrink: 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+    }
+
+    .sidebar-logo {
+      padding: 0 20px 24px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #7c6fff;
+      border-bottom: 1px solid #2a2a4a;
+      margin-bottom: 16px;
+    }
+
+    .sidebar-logo span { color: #e0e0f0; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+      color: #888;
+      font-size: 14px;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover { background: #252540; color: #e0e0f0; }
+    .nav-item.active { background: #252540; color: #7c6fff; border-left-color: #7c6fff; }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: 220px;
+      flex: 1;
+      padding: 32px;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .page-title { font-size: 22px; font-weight: 700; }
+    .page-subtitle { font-size: 13px; color: #888; margin-top: 4px; }
+
+    /* ── BUTTON ── */
+    .btn {
+      padding: 9px 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-primary { background: #7c6fff; color: #fff; }
+    .btn-primary:hover { background: #6a5fee; }
+    .btn-danger { background: #ff4f4f22; color: #ff6b6b; border: 1px solid #ff4f4f44; }
+    .btn-danger:hover { background: #ff4f4f44; }
+    .btn-secondary { background: #252540; color: #aaa; border: 1px solid #3a3a5a; }
+    .btn-secondary:hover { background: #2e2e50; color: #e0e0f0; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+    /* ── API CONFIG ── */
+    .config-bar {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .config-bar label { font-size: 12px; color: #888; white-space: nowrap; }
+
+    .config-bar input {
+      flex: 1;
+      background: #0f0f1a;
+      border: 1px solid #3a3a5a;
+      border-radius: 6px;
+      padding: 7px 12px;
+      color: #e0e0f0;
+      font-size: 13px;
+    }
+
+    .api-status {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .api-status.ok { background: #1a3a2a; color: #4ade80; }
+    .api-status.error { background: #3a1a1a; color: #f87171; }
+    .api-status.idle { background: #252540; color: #888; }
+
+    /* ── PROJECT GRID ── */
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .project-card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+
+    .project-card:hover { border-color: #7c6fff; }
+
+    .project-thumb {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      background: #252540;
+      display: block;
+    }
+
+    .project-thumb-placeholder {
+      width: 100%;
+      height: 160px;
+      background: linear-gradient(135deg, #252540, #1a1a2e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: #3a3a5a;
+    }
+
+    .project-body { padding: 14px; }
+
+    .project-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .project-category {
+      font-size: 11px;
+      color: #7c6fff;
+      background: #7c6fff22;
+      padding: 2px 8px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    .project-desc {
+      font-size: 12px;
+      color: #888;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .tech-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+
+    .tech-tag {
+      font-size: 10px;
+      padding: 2px 7px;
+      background: #252540;
+      border: 1px solid #3a3a5a;
+      border-radius: 4px;
+      color: #aaa;
+    }
+
+    .project-actions { display: flex; gap: 8px; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #1a1a2e;
+      border: 1px solid #3a3a5a;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid #2a2a4a;
+    }
+
+    .modal-title { font-size: 16px; font-weight: 700; }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .modal-close:hover { color: #e0e0f0; }
+
+    .modal-body { padding: 24px; }
+
+    /* ── FORM ── */
+    .form-group { margin-bottom: 18px; }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #aaa;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input, .form-textarea, .form-select {
+      width: 100%;
+      background: #0f0f1a;
+      border: 1px solid #3a3a5a;
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #e0e0f0;
+      font-size: 14px;
+      transition: border-color 0.15s;
+    }
+
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      outline: none;
+      border-color: #7c6fff;
+    }
+
+    .form-textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+
+    .form-hint { font-size: 11px; color: #666; margin-top: 4px; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 16px 24px;
+      border-top: 1px solid #2a2a4a;
+    }
+
+    /* ── TOAST ── */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      animation: slideIn 0.2s ease;
+      max-width: 320px;
+    }
+
+    .toast.success { background: #1a3a2a; color: #4ade80; border: 1px solid #2a5a3a; }
+    .toast.error   { background: #3a1a1a; color: #f87171; border: 1px solid #5a2a2a; }
+
+    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } }
+
+    /* ── LOADING ── */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      color: #888;
+      gap: 12px;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #3a3a5a;
+      border-top-color: #7c6fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">Nochy<span>OS</span> Admin</div>
+    <nav>
+      <div class="nav-item active" onclick="showPage('projects')">
+        📁 Projects
+      </div>
+      <div class="nav-item" onclick="showPage('settings')">
+        ⚙️ Settings
+      </div>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- API CONFIG BAR -->
+    <div class="config-bar">
+      <label>API URL:</label>
+      <input type="text" id="apiUrl" placeholder="Paste Google Apps Script Web App URL disini..."
+        oninput="saveApiUrl()">
+      <button class="btn btn-secondary btn-sm" onclick="testConnection()">Test</button>
+      <span class="api-status idle" id="apiStatus">Belum diset</span>
+    </div>
+
+    <!-- PAGE: PROJECTS -->
+    <div class="page active" id="page-projects">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Projects</div>
+          <div class="page-subtitle">Manage semua project portofolio</div>
+        </div>
+        <button class="btn btn-primary" onclick="openAddModal()">+ Tambah Project</button>
+      </div>
+
+      <div id="projectList">
+        <div class="empty-state">
+          <div class="empty-icon">🔌</div>
+          <p>Set API URL dulu di atas, lalu klik Test</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Settings</div>
+          <div class="page-subtitle">Konfigurasi admin panel</div>
+        </div>
+      </div>
+
+      <div style="background:#1a1a2e;border:1px solid #2a2a4a;border-radius:12px;padding:24px;max-width:500px;">
+        <div class="form-group">
+          <label class="form-label">Google Apps Script URL</label>
+          <input type="text" class="form-input" id="apiUrlSettings"
+            placeholder="https://script.google.com/macros/s/.../exec"
+            oninput="syncApiUrl()">
+          <p class="form-hint">Dapatkan URL ini dari Google Apps Script → Deploy → Web App</p>
+        </div>
+        <button class="btn btn-primary" onclick="testConnection()">Test Koneksi</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL: ADD/EDIT PROJECT -->
+<div class="modal-overlay" id="projectModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Tambah Project</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Judul *</label>
+          <input type="text" class="form-input" id="f_judul" placeholder="Nochy Eat">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kategori *</label>
+          <input type="text" class="form-input" id="f_kategori" placeholder="Mobile App">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Deskripsi *</label>
+        <textarea class="form-textarea" id="f_deskripsi" placeholder="Deskripsi project..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">URL Thumbnail</label>
+        <input type="text" class="form-input" id="f_url_thumbnail"
+          placeholder="https://drive.google.com/uc?id=...">
+        <p class="form-hint">Link Google Drive gambar cover. Format: https://drive.google.com/uc?id=FILE_ID</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Gambar Detail</label>
+        <textarea class="form-textarea" id="f_gambar_detail"
+          placeholder="https://drive.google.com/uc?id=IMG1,https://drive.google.com/uc?id=IMG2"
+          style="min-height:60px;"></textarea>
+        <p class="form-hint">Multiple URL dipisah koma</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Link Project</label>
+        <input type="text" class="form-input" id="f_link_project"
+          placeholder="https://github.com/username/repo">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Teknologi</label>
+        <input type="text" class="form-input" id="f_teknologi"
+          placeholder="Flutter,Dart,Supabase,PostgreSQL">
+        <p class="form-hint">Pisah dengan koma</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Batal</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveProject()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  // ── STATE ──────────────────────────────────────────────
+  let API_URL = localStorage.getItem('nochyos_api_url') || '';
+  let projects = [];
+  let editingId = null;
+
+  // ── INIT ──────────────────────────────────────────────
+  window.onload = function() {
+    if (API_URL) {
+      document.getElementById('apiUrl').value = API_URL;
+      document.getElementById('apiUrlSettings').value = API_URL;
+      loadProjects();
+    }
+  };
+
+  // ── NAVIGATION ────────────────────────────────────────
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  // ── API URL ───────────────────────────────────────────
+  function saveApiUrl() {
+    API_URL = document.getElementById('apiUrl').value.trim();
+    localStorage.setItem('nochyos_api_url', API_URL);
+    document.getElementById('apiUrlSettings').value = API_URL;
+  }
+
+  function syncApiUrl() {
+    API_URL = document.getElementById('apiUrlSettings').value.trim();
+    localStorage.setItem('nochyos_api_url', API_URL);
+    document.getElementById('apiUrl').value = API_URL;
+  }
+
+  async function testConnection() {
+    if (!API_URL) { toast('Set API URL dulu', 'error'); return; }
+    setApiStatus('loading');
+    try {
+      const res = await fetch(API_URL + '?action=getProjects');
+      const data = await res.json();
+      if (data.status === 'ok') {
+        setApiStatus('ok');
+        toast('Koneksi berhasil! ' + data.data.length + ' project ditemukan', 'success');
+        renderProjects(data.data);
+      } else {
+        setApiStatus('error');
+        toast('Error: ' + (data.error || 'Unknown'), 'error');
+      }
+    } catch (e) {
+      setApiStatus('error');
+      toast('Gagal konek: ' + e.message, 'error');
+    }
+  }
+
+  function setApiStatus(status) {
+    const el = document.getElementById('apiStatus');
+    el.className = 'api-status';
+    if (status === 'ok') { el.classList.add('ok'); el.textContent = '● Connected'; }
+    else if (status === 'error') { el.classList.add('error'); el.textContent = '● Error'; }
+    else if (status === 'loading') { el.classList.add('idle'); el.textContent = '...'; }
+    else { el.classList.add('idle'); el.textContent = 'Belum diset'; }
+  }
+
+  // ── LOAD PROJECTS ─────────────────────────────────────
+  async function loadProjects() {
+    if (!API_URL) return;
+    document.getElementById('projectList').innerHTML = `
+      <div class="loading"><div class="spinner"></div> Memuat data...</div>
+    `;
+    try {
+      const res = await fetch(API_URL + '?action=getProjects');
+      const data = await res.json();
+      if (data.status === 'ok') {
+        projects = data.data;
+        renderProjects(projects);
+        setApiStatus('ok');
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (e) {
+      document.getElementById('projectList').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">❌</div>
+          <p>Gagal memuat: ${e.message}</p>
+          <button class="btn btn-secondary" onclick="loadProjects()">Coba Lagi</button>
+        </div>
+      `;
+      setApiStatus('error');
+    }
+  }
+
+  // ── RENDER PROJECTS ───────────────────────────────────
+  function renderProjects(list) {
+    if (!list || list.length === 0) {
+      document.getElementById('projectList').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📂</div>
+          <p>Belum ada project. Tambah project pertamamu!</p>
+          <button class="btn btn-primary" onclick="openAddModal()">+ Tambah Project</button>
+        </div>
+      `;
+      return;
+    }
+
+    const html = `<div class="project-grid">` + list.map(p => `
+      <div class="project-card">
+        ${p.url_thumbnail
+          ? `<img class="project-thumb" src="${p.url_thumbnail}" alt="${p.judul}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+          : ''}
+        <div class="project-thumb-placeholder" ${p.url_thumbnail ? 'style="display:none"' : ''}>📁</div>
+        <div class="project-body">
+          <div class="project-title">${p.judul}</div>
+          <span class="project-category">${p.kategori}</span>
+          <div class="project-desc">${p.deskripsi}</div>
+          <div class="tech-tags">
+            ${(Array.isArray(p.teknologi) ? p.teknologi : []).slice(0,4).map(t =>
+              `<span class="tech-tag">${t}</span>`
+            ).join('')}
+          </div>
+          <div class="project-actions">
+            <button class="btn btn-secondary btn-sm" onclick="openEditModal('${p.id}')">✏️ Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmDelete('${p.id}', '${p.judul}')">🗑️ Hapus</button>
+          </div>
+        </div>
+      </div>
+    `).join('') + `</div>`;
+
+    document.getElementById('projectList').innerHTML = html;
+  }
+
+  // ── MODAL ─────────────────────────────────────────────
+  function openAddModal() {
+    editingId = null;
+    document.getElementById('modalTitle').textContent = 'Tambah Project';
+    document.getElementById('editId').value = '';
+    clearForm();
+    document.getElementById('projectModal').classList.add('open');
+  }
+
+  function openEditModal(id) {
+    const p = projects.find(x => x.id === id);
+    if (!p) return;
+    editingId = id;
+    document.getElementById('modalTitle').textContent = 'Edit Project';
+    document.getElementById('editId').value = id;
+
+    document.getElementById('f_judul').value = p.judul || '';
+    document.getElementById('f_kategori').value = p.kategori || '';
+    document.getElementById('f_deskripsi').value = p.deskripsi || '';
+    document.getElementById('f_url_thumbnail').value = p.url_thumbnail || '';
+    document.getElementById('f_gambar_detail').value = Array.isArray(p.gambar_detail)
+      ? p.gambar_detail.join(',') : (p.gambar_detail || '');
+    document.getElementById('f_link_project').value = p.link_project || '';
+    document.getElementById('f_teknologi').value = Array.isArray(p.teknologi)
+      ? p.teknologi.join(',') : (p.teknologi || '');
+
+    document.getElementById('projectModal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('projectModal').classList.remove('open');
+  }
+
+  function clearForm() {
+    ['f_judul','f_kategori','f_deskripsi','f_url_thumbnail','f_gambar_detail','f_link_project','f_teknologi']
+      .forEach(id => document.getElementById(id).value = '');
+  }
+
+  // ── SAVE PROJECT ──────────────────────────────────────
+  async function saveProject() {
+    const judul = document.getElementById('f_judul').value.trim();
+    const kategori = document.getElementById('f_kategori').value.trim();
+    const deskripsi = document.getElementById('f_deskripsi').value.trim();
+
+    if (!judul || !kategori || !deskripsi) {
+      toast('Judul, Kategori, dan Deskripsi wajib diisi', 'error');
+      return;
+    }
+
+    const project = {
+      judul,
+      kategori,
+      deskripsi,
+      url_thumbnail: document.getElementById('f_url_thumbnail').value.trim(),
+      gambar_detail: document.getElementById('f_gambar_detail').value.trim(),
+      link_project:  document.getElementById('f_link_project').value.trim(),
+      teknologi:     document.getElementById('f_teknologi').value.trim(),
+    };
+
+    const btn = document.getElementById('saveBtn');
+    btn.textContent = 'Menyimpan...';
+    btn.disabled = true;
+
+    try {
+      let body, action;
+      if (editingId) {
+        action = 'updateProject';
+        body = { action, id: editingId, project };
+      } else {
+        action = 'addProject';
+        body = { action, project };
+      }
+
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+
+      if (data.status === 'ok') {
+        toast(editingId ? 'Project berhasil diupdate!' : 'Project berhasil ditambahkan!', 'success');
+        closeModal();
+        loadProjects();
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (e) {
+      toast('Gagal menyimpan: ' + e.message, 'error');
+    } finally {
+      btn.textContent = 'Simpan';
+      btn.disabled = false;
+    }
+  }
+
+  // ── DELETE ────────────────────────────────────────────
+  function confirmDelete(id, judul) {
+    if (!confirm(`Hapus project "${judul}"?\n\nTindakan ini tidak bisa dibatalkan.`)) return;
+    deleteProject(id);
+  }
+
+  async function deleteProject(id) {
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'deleteProject', id })
+      });
+      const data = await res.json();
+      if (data.status === 'ok') {
+        toast('Project berhasil dihapus', 'success');
+        loadProjects();
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (e) {
+      toast('Gagal menghapus: ' + e.message, 'error');
+    }
+  }
+
+  // ── TOAST ─────────────────────────────────────────────
+  function toast(msg, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = 'toast ' + type;
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+  }
+
+  // Close modal on overlay click
+  document.getElementById('projectModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+</script>
+</body>
+</html>
