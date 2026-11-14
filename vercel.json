@@ -16,7 +16,11 @@
       "dest": "/admin-panel/api/$1"
     },
     {
-      "src": "/admin(.*)",
+      "src": "/admin-panel/(.*)",
+      "dest": "/admin-panel/public/$1"
+    },
+    {
+      "src": "/admin",
       "dest": "/admin-panel/public/index.html"
     },
     {
