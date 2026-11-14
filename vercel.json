@@ -32,6 +32,14 @@
       "dest": "/admin-panel/public/$1"
     },
     {
+      "src": "/admin-panel/(.*)",
+      "dest": "/admin-panel/public/$1"
+    },
+    {
+      "src": "/admin-panel",
+      "dest": "/admin-panel/public/index.html"
+    },
+    {
       "handle": "filesystem"
     },
     {
