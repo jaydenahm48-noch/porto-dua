@@ -6,15 +6,11 @@
       "use": "@vercel/node"
     },
     {
-      "src": "admin-panel/public/**",
+      "src": "admin-panel/**",
       "use": "@vercel/static"
     },
     {
       "src": "index.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "**/*",
       "use": "@vercel/static"
     }
   ],
@@ -25,22 +21,11 @@
     },
     {
       "src": "/admin",
-      "dest": "/admin-panel/public/index.html"
+      "dest": "/admin-panel/index.html"
     },
     {
       "src": "/admin/(.*)",
-      "dest": "/admin-panel/public/$1"
-    },
-    {
-      "src": "/admin-panel/(.*)",
-      "dest": "/admin-panel/public/$1"
-    },
-    {
-      "src": "/admin-panel",
-      "dest": "/admin-panel/public/index.html"
-    },
-    {
-      "handle": "filesystem"
+      "dest": "/admin-panel/$1"
     },
     {
       "src": "/(.*)",
