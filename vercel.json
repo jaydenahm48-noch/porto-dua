@@ -6,6 +6,14 @@
       "use": "@vercel/node"
     },
     {
+      "src": "admin-panel/public/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    },
+    {
       "src": "**/*",
       "use": "@vercel/static"
     }
@@ -16,12 +24,12 @@
       "dest": "/admin-panel/api/$1"
     },
     {
-      "src": "/admin-panel/(.*)",
-      "dest": "/admin-panel/public/$1"
-    },
-    {
       "src": "/admin",
       "dest": "/admin-panel/public/index.html"
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "/admin-panel/public/$1"
     },
     {
       "handle": "filesystem"
